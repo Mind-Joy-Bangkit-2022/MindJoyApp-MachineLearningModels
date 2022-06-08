@@ -68,7 +68,7 @@ def mentalhHealthReq():
              'If sad, how likely are you to take an appointment with a psychologist or a counsellor for your current mental state?',
              'How often do you get offended or angry or start crying ?',
              'How likely do you feel yourself vulnerable or lonely?',
-             'How comfortable are you in talking about your mental health?', 'Prediction']
+             'How comfortable are you in talking about your mental health?']
 
     items_cat = ['Are you above 30 years of age?', 'How are you feeling today?',
                  'Is your sadness momentarily or has it been constant for a long time?',
