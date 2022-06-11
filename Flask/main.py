@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request
-
-# from tensorflow.keras.preprocessing import image
-# from tensorflow.keras.models import load_model
-
+import pandas as pd
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.models import load_model
+import numpy as np
+import tensorflow_hub as tfhub
 app = Flask(__name__)
 
 emotion_labels = {0: "Happy", 1: "Neutral", 2: "Sad"}
@@ -11,7 +12,7 @@ mental_health_labels = {0: "Butuh Penanganan", 1: "Tidak Butuh Penanganan"}
 
 def predictMentalHealth(data):
     # load model
-    model = load_model("mental-health-03.h5", custom_objects={
+    model = load_model("mental-health-03_v3.h5", custom_objects={
         'KerasLayer': tfhub.KerasLayer})
     print(data)
     predictions = model.predict(data)
@@ -25,7 +26,7 @@ def predictMentalHealth(data):
 
 def processEmotion(IMG_PATH):
     # load model
-    model = load_model("./ML-API/.h5", custom_objects={
+    model = load_model("emotion_classification_01.h5", custom_objects={
         'KerasLayer': tfhub.KerasLayer})
 
     img = image.load_img(IMG_PATH, target_size=(150, 150))
@@ -68,50 +69,32 @@ def mentalhHealthReq():
              'If sad, how likely are you to take an appointment with a psychologist or a counsellor for your current mental state?',
              'How often do you get offended or angry or start crying ?',
              'How likely do you feel yourself vulnerable or lonely?',
-             'How comfortable are you in talking about your mental health?']
-
-    items_cat = ['Are you above 30 years of age?', 'How are you feeling today?',
-                 'Is your sadness momentarily or has it been constant for a long time?',
-                 'At what time of the day are you extremely low?',
-                 'How frequently have you had little pleasure or interest in the activities you usually enjoy?',
-                 'How confident you have been feeling in your capabilities recently.',
-                 'Describe how ‘supported’ you feel by others around you – your friends, family, or otherwise.',
-                 'How frequently have you been doing things that mean something to you or your life?',
-                 'How easy is it for you to take medical leave for a mental health condition?',
-                 'How often do you make use of substance abuse(e.g. smoking, alcohol)?',
-                 'How many hours do you spend per day on watching mobile phone, laptop, computer, television, etc.?',
-                 'If sad, how likely are you to take an appointment with a psychologist or a counsellor for your current mental state?',
-                 'How often do you get offended or angry or start crying ?',
-                 'How likely do you feel yourself vulnerable or lonely?',
-                 'How comfortable are you in talking about your mental health?']
+             'How comfortable are you in talking about your mental health?',
+             'Prediction']
 
     for item in items:
         if item not in request.form:
             msg = item + " is empty"
             return jsonify({"error": msg})
 
-    gender = str(request.form['Gender'])
-    age = int(request.form['Are you above 30 years of age?'])
-    # age = (age - 1) / (96 - 1)
-    feeling = int(request.form['How are you feeling today?'])
-    sadness = int(request.form['Is your sadness momentarily or has it been constant for a long time?'])
-    time = int(request.form['At what time of the day are you extremely low?'])
-    activities_interest = int(
-        request.form['How frequently have you had little pleasure or interest in the activities you usually enjoy?'])
-    confident = int(request.form['How confident you have been feeling in your capabilities recently.'])
-    supported = int(
-        request.form['Describe how ‘supported’ you feel by others around you – your friends, family, or otherwise.'])
-    doing_thing = int(
-        request.form['How frequently have you been doing things that mean something to you or your life?'])
-    medical = int(request.form['How easy is it for you to take medical leave for a mental health condition?'])
-    substance_abuse = int(request.form['How often do you make use of substance abuse(e.g. smoking, alcohol)?'])
-    using_gadget = int(request.form[
-                           'How many hours do you spend per day on watching mobile phone, laptop, computer, television, etc.?'])
-    appoinment = int(request.form[
-                         'If sad, how likely are you to take an appointment with a psychologist or a counsellor for your current mental state?'])
-    get_offended = int(request.form['How often do you get offended or angry or start crying ?'])
-    vulnerable_lonely = int(request.form['How likely do you feel yourself vulnerable or lonely?'])
-    comfort = int(request.form['How comfortable are you in talking about your mental health?'])
+    gender = int(request.form.get('Gender'))
+    age = int(request.form.get('Are you above 30 years of age?'))
+    feeling = int(request.form.get('How are you feeling today?'))
+    sadness = int(request.form.get('Is your sadness momentarily or has it been constant for a long time?'))
+    time = int(request.form.get('At what time of the day are you extremely low?'))
+    interest = int(request.form.get('How frequently have you had little pleasure or interest in the activities you usually enjoy?'))
+    confident = int(request.form.get('How confident you have been feeling in your capabilities recently.'))
+    supported = int(request.form.get('Describe how ‘supported’ you feel by others around you – your friends, family, or otherwise.'))
+    things = int(request.form.get('How frequently have you been doing things that mean something to you or your life?'))
+    medical = int(request.form.get('How easy is it for you to take medical leave for a mental health condition?'))
+    substance = int(request.form.get('How often do you make use of substance abuse(e.g. smoking, alcohol)?'))
+    hours = int(request.form.get('How many hours do you spend per day on watching mobile phone, laptop, computer, television, etc.?'))
+    appointment = int(request.form.get('If sad, how likely are you to take an appointment with a psychologist or a counsellor for your current mental state?'))
+    offended = int(request.form.get('How often do you get offended or angry or start crying ?'))
+    vulnerable = int(request.form.get('How likely do you feel yourself vulnerable or lonely?'))
+    comfortable = int(request.form.get('How comfortable are you in talking about your mental health?'))
+    prediction = gender+age+feeling+sadness+time+interest+confident+supported+things+medical+substance+hours+appointment+offended+vulnerable+comfortable
+
 
     #     data_dummy = [age, "female" if gender == "male" else "female",
     #                   0 if feeling == 1 else 1,
@@ -126,14 +109,18 @@ def mentalhHealthReq():
     #                   0 if using_gadget == 1 else 1,
     #                   0 if appoinment == 1 else 1,'
     data_dummy = []
-
-    # gender
+    #gender
     if gender == 0:
         data_dummy.append("Male")
     elif gender == 1:
         data_dummy.append("Female")
     else:
         data_dummy.append("Prefer not to say")
+    # age
+    if age == 0:
+        data_dummy.append("No")
+    else:
+        data_dummy.append("Yes")
     # feeling
     if feeling == 0:
         data_dummy.append("Fine")
@@ -160,11 +147,11 @@ def mentalhHealthReq():
     else:
         data_dummy.append("Evening")
     # activities_interest
-    if activities_interest == 0:
+    if interest == 0:
         data_dummy.append("Never")
-    elif activities_interest == 1:
+    elif interest == 1:
         data_dummy.append("Sometimes")
-    elif activities_interest == 2:
+    elif interest == 2:
         data_dummy.append("Often")
     else:
         data_dummy.append("Very often")
@@ -189,11 +176,11 @@ def mentalhHealthReq():
     else:
         data_dummy.append("Not at all")
     # doing_thing
-    if doing_thing == 0:
+    if things == 0:
         data_dummy.append("Very Often")
-    elif doing_thing == 1:
+    elif things == 1:
         data_dummy.append("Often")
-    elif doing_thing == 2:
+    elif things == 2:
         data_dummy.append("Sometimes")
     else:
         data_dummy.append("Never")
@@ -207,74 +194,78 @@ def mentalhHealthReq():
     else:
         data_dummy.append("Difficult")
     # substance_abuse
-    if substance_abuse == 0:
+    if substance == 0:
         data_dummy.append("Never")
-    elif substance_abuse == 1:
+    elif substance == 1:
         data_dummy.append("Sometimes")
-    elif substance_abuse == 2:
+    elif substance == 2:
         data_dummy.append("Often")
     else:
         data_dummy.append("Very Often")
     # using_gadget
-    if using_gadget == 0:
+    if hours == 0:
         data_dummy.append("1-2 hours")
-    elif using_gadget == 1:
+    elif hours == 1:
         data_dummy.append("2-5 hours")
-    elif using_gadget == 2:
+    elif hours == 2:
         data_dummy.append("5-10 hours")
     else:
         data_dummy.append("More than 10 hours")
     # appointment
-    if appoinment == 1:
+    if appointment == 1:
         data_dummy.append(1)
-    elif appoinment == 2:
+    elif appointment == 2:
         data_dummy.append(2)
-    elif appoinment == 3:
+    elif appointment == 3:
         data_dummy.append(3)
-    elif appoinment == 4:
+    elif appointment == 4:
         data_dummy.append(4)
     else:
         data_dummy.append(5)
-    # get_offended
-    if get_offended == 0:
+    # offended
+    if offended == 0:
         data_dummy.append("Never")
-    elif get_offended == 1:
+    elif offended == 1:
         data_dummy.append("Sometimes")
-    elif get_offended == 2:
+    elif offended == 2:
         data_dummy.append("Often")
     else:
         data_dummy.append("Very often")
-    # vulnerable_lonely
-    if vulnerable_lonely == 1:
+    # vulnerable
+    if vulnerable == 1:
         data_dummy.append(1)
-    elif vulnerable_lonely == 2:
+    elif vulnerable == 2:
         data_dummy.append(2)
-    elif vulnerable_lonely == 3:
+    elif vulnerable == 3:
         data_dummy.append(3)
-    elif vulnerable_lonely == 4:
+    elif vulnerable == 4:
         data_dummy.append(4)
     else:
         data_dummy.append(5)
-    # comfort
-    if comfort == 1:
+    # comfortable
+    if comfortable == 1:
         data_dummy.append(1)
-    elif comfort == 2:
+    elif comfortable == 2:
         data_dummy.append(2)
-    elif comfort == 3:
+    elif comfortable == 3:
         data_dummy.append(3)
-    elif comfort == 4:
+    elif comfortable == 4:
         data_dummy.append(4)
     else:
         data_dummy.append(5)
+    #Prediction
+    if prediction > 35:
+        data_dummy.append(0)
+    else:
+        data_dummy.append(1)
 
-    data = [[age, gender, feeling, sadness, time, activities_interest, confident, supported, doing_thing, medical,
-             substance_abuse, using_gadget, appoinment, get_offended, vulnerable_lonely, comfort], data_dummy]
+    data = [data_dummy]
 
     data_df = pd.DataFrame(data=data, columns=items)
 
-    features_cat = pd.get_dummies(data_df[items_cat].astype('category'))
+    features_cat = pd.get_dummies(data_df[items].astype('category'))
     features = pd.concat([data_df, features_cat], axis=1)
-    features = features.drop(columns=items_cat).loc[[0], :]
+    features = features.drop(columns=items).loc[[0], :]
 
     resp = predictMentalHealth(features)
 
