@@ -7,21 +7,21 @@ import tensorflow_hub as tfhub
 app = Flask(__name__)
 
 emotion_labels = {0: "Happy", 1: "Neutral", 2: "Sad"}
-mental_health_labels = {0: "Butuh Penanganan", 1: "Tidak Butuh Penanganan"}
+mental_health_labels = {0: "Tidak Butuh Penanganan", 1: "Butuh Penanganan"}
 
 
 def predictMentalHealth(data):
     # load model
-    model = load_model("mental-health-03_v3.h5", custom_objects={
+    model = load_model("mental-health-03.h5", custom_objects={
         'KerasLayer': tfhub.KerasLayer})
     print(data)
     predictions = model.predict(data)
     predicted_class_indices = np.where(predictions < 0.5, 0, 1)
     if predicted_class_indices == 0:
-        result = "Butuh Penanganan"
+        value = "Tidak Butuh Penanganan"
     else:
-        result = "Tidak Butuh Penanganan"
-    return result
+        value = "Butuh Penanganan"
+    return value
 
 
 def processEmotion(IMG_PATH):
@@ -69,8 +69,7 @@ def mentalhHealthReq():
              'If sad, how likely are you to take an appointment with a psychologist or a counsellor for your current mental state?',
              'How often do you get offended or angry or start crying ?',
              'How likely do you feel yourself vulnerable or lonely?',
-             'How comfortable are you in talking about your mental health?',
-             'Prediction']
+             'How comfortable are you in talking about your mental health?']
 
     for item in items:
         if item not in request.form:
@@ -93,7 +92,6 @@ def mentalhHealthReq():
     offended = int(request.form.get('How often do you get offended or angry or start crying ?'))
     vulnerable = int(request.form.get('How likely do you feel yourself vulnerable or lonely?'))
     comfortable = int(request.form.get('How comfortable are you in talking about your mental health?'))
-    prediction = gender+age+feeling+sadness+time+interest+confident+supported+things+medical+substance+hours+appointment+offended+vulnerable+comfortable
 
 
     #     data_dummy = [age, "female" if gender == "male" else "female",
@@ -111,50 +109,62 @@ def mentalhHealthReq():
     data_dummy = []
     #gender
     if gender == 0:
-        data_dummy.append("Male")
+        data_dummy.append(0)
     elif gender == 1:
-        data_dummy.append("Female")
+        data_dummy.append(1)
+    elif gender == 2:
+        data_dummy.append(2)
     else:
-        data_dummy.append("Prefer not to say")
+        return jsonify({"gender error": "Not Available"})
     # age
     if age == 0:
-        data_dummy.append("No")
+        data_dummy.append(0)
+    elif age == 1:
+        data_dummy.append(1)
     else:
-        data_dummy.append("Yes")
+        return jsonify({"age error": "Not Available"})
     # feeling
     if feeling == 0:
-        data_dummy.append("Fine")
+        data_dummy.append(0)
     elif feeling == 1:
-        data_dummy.append("Good")
+        data_dummy.append(1)
     elif feeling == 2:
-        data_dummy.append("Sad")
+        data_dummy.append(2)
+    elif feeling == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Depressed")
+        return jsonify({"feeling error": "Not Available"})
     # sadness
     if sadness == 0:
-        data_dummy.append("Not sad")
+        data_dummy.append(0)
     elif sadness == 1:
-        data_dummy.append("For some time")
+        data_dummy.append(1)
     elif sadness == 2:
-        data_dummy.append("Significant time")
+        data_dummy.append(2)
+    elif sadness == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Long time")
+        return jsonify({"sadness error": "Not Available"})
     # time
     if time == 0:
-        data_dummy.append("Morning")
+        data_dummy.append(0)
     elif time == 1:
-        data_dummy.append("Afternoon")
+        data_dummy.append(1)
+    elif time == 2:
+        data_dummy.append(2)
     else:
-        data_dummy.append("Evening")
+        return jsonify({"time error": "Not Available"})
     # activities_interest
     if interest == 0:
-        data_dummy.append("Never")
+        data_dummy.append(0)
     elif interest == 1:
-        data_dummy.append("Sometimes")
+        data_dummy.append(1)
     elif interest == 2:
-        data_dummy.append("Often")
+        data_dummy.append(2)
+    elif interest == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Very often")
+        return jsonify({"interest error": "Not Available"})
     # confident
     if confident == 1:
         data_dummy.append(1)
@@ -164,53 +174,65 @@ def mentalhHealthReq():
         data_dummy.append(3)
     elif confident == 4:
         data_dummy.append(4)
-    else:
+    elif confident == 5:
         data_dummy.append(5)
+    else:
+        return jsonify({"confident error": "Not Available"})
     # supported
     if supported == 0:
-        data_dummy.append("Highly supportive")
+        data_dummy.append(0)
     elif supported == 1:
-        data_dummy.append("Satisfactory")
+        data_dummy.append(1)
     elif supported == 2:
-        data_dummy.append("Little bit")
+        data_dummy.append(2)
+    elif supported == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Not at all")
+        return jsonify({"supported error": "Not Available"})
     # doing_thing
     if things == 0:
-        data_dummy.append("Very Often")
+        data_dummy.append(0)
     elif things == 1:
-        data_dummy.append("Often")
+        data_dummy.append(1)
     elif things == 2:
-        data_dummy.append("Sometimes")
+        data_dummy.append(2)
+    elif things == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Never")
+        return jsonify({"things error": "Not Available"})
     # medical
     if medical == 0:
-        data_dummy.append("Very easy")
+        data_dummy.append(0)
     elif medical == 1:
-        data_dummy.append("Easy")
+        data_dummy.append(1)
     elif medical == 2:
-        data_dummy.append("Not so easy")
+        data_dummy.append(2)
+    elif medical == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Difficult")
+        return jsonify({"medical error": "Not Available"})
     # substance_abuse
     if substance == 0:
-        data_dummy.append("Never")
+        data_dummy.append(0)
     elif substance == 1:
-        data_dummy.append("Sometimes")
+        data_dummy.append(1)
     elif substance == 2:
-        data_dummy.append("Often")
+        data_dummy.append(2)
+    elif substance == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Very Often")
+        return jsonify({"substance error": "Not Available"})
     # using_gadget
     if hours == 0:
-        data_dummy.append("1-2 hours")
+        data_dummy.append(0)
     elif hours == 1:
-        data_dummy.append("2-5 hours")
+        data_dummy.append(1)
     elif hours == 2:
-        data_dummy.append("5-10 hours")
+        data_dummy.append(2)
+    elif hours == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("More than 10 hours")
+        return jsonify({"hours error": "Not Available"})
     # appointment
     if appointment == 1:
         data_dummy.append(1)
@@ -220,17 +242,21 @@ def mentalhHealthReq():
         data_dummy.append(3)
     elif appointment == 4:
         data_dummy.append(4)
-    else:
+    elif appointment == 5:
         data_dummy.append(5)
+    else:
+        return jsonify({"appointment error": "Not Available"})
     # offended
     if offended == 0:
-        data_dummy.append("Never")
+        data_dummy.append(0)
     elif offended == 1:
-        data_dummy.append("Sometimes")
+        data_dummy.append(1)
     elif offended == 2:
-        data_dummy.append("Often")
+        data_dummy.append(2)
+    elif offended == 3:
+        data_dummy.append(3)
     else:
-        data_dummy.append("Very often")
+        return jsonify({"offended error": "Not Available"})
     # vulnerable
     if vulnerable == 1:
         data_dummy.append(1)
@@ -240,8 +266,10 @@ def mentalhHealthReq():
         data_dummy.append(3)
     elif vulnerable == 4:
         data_dummy.append(4)
-    else:
+    elif vulnerable == 5:
         data_dummy.append(5)
+    else:
+        return jsonify({"vulnerable error": "Not Available"})
     # comfortable
     if comfortable == 1:
         data_dummy.append(1)
@@ -251,13 +279,10 @@ def mentalhHealthReq():
         data_dummy.append(3)
     elif comfortable == 4:
         data_dummy.append(4)
-    else:
+    elif comfortable == 5:
         data_dummy.append(5)
-    #Prediction
-    if prediction > 35:
-        data_dummy.append(0)
     else:
-        data_dummy.append(1)
+        return jsonify({"comfortable error": "Not Available"})
 
     data = [data_dummy]
 
