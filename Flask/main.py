@@ -16,8 +16,9 @@ def predictMentalHealth(data):
         'KerasLayer': tfhub.KerasLayer})
     print(data)
     predictions = model.predict(data)
-    predicted_class_indices = np.where(predictions < 0.5, 0, 1)
-    if predicted_class_indices == 0:
+    print(predictions)
+    # predicted_class_indices = np.where(predictions < 0.5, 0, 1)
+    if predictions < 0.5:
         value = "Tidak Butuh Penanganan"
     else:
         value = "Butuh Penanganan"
@@ -288,11 +289,11 @@ def mentalhHealthReq():
 
     data_df = pd.DataFrame(data=data, columns=items)
 
-    features_cat = pd.get_dummies(data_df[items].astype('category'))
-    features = pd.concat([data_df, features_cat], axis=1)
-    features = features.drop(columns=items).loc[[0], :]
+    # features_cat = pd.get_dummies(data_df[items].astype('category'))
+    # features = pd.concat([data_df, features_cat], axis=1)
+    # features = features.drop(columns=items).loc[[0], :]
 
-    resp = predictMentalHealth(features)
+    resp = predictMentalHealth(data)
 
     return jsonify({"result": resp})
 
