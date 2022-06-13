@@ -1,4 +1,10 @@
-# Our Profile
+
+<h1 align="center">
+  <img align="center" src="https://github.com/Mind-Joy-Bangkit-2022/MindJoyApp/blob/master/misc/img/icon.png"  width="300"></img>
+  <br> 
+  MindJoyApp
+  
+</h1># Our Profile
 
 Team ID : C22-PS293
 
@@ -15,6 +21,8 @@ Team Members :
 This project is our Final Project for Bangkit Google Academy 2022.
 
 Machine Learning : [MindJoy-ML](https://github.com/Mind-Joy-Bangkit-2022/MindJoyApp-MachineLearningModels)
+
+Application : [MindJoy-MD](https://github.com/Mind-Joy-Bangkit-2022/MindJoyApp#background)
 
 Cloud : [MindJoy-Cloud](https://github.com/Mind-Joy-Bangkit-2022/mindjoy-cc)
 
